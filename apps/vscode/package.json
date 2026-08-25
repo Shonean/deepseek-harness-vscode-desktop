@@ -1,0 +1,148 @@
+{
+  "name": "@deepseek-ai/dsh-vscode",
+  "displayName": "DeepSeek Harness",
+  "description": "Native VSCode sidebar chat for the DeepSeek Harness agent runtime, with switchable API presets and Claude Code/OpenCode subagents.",
+  "version": "0.1.1-rc.2",
+  "publisher": "deepseek-ai",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "main": "./dist/extension.cjs",
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "runtime",
+    "media"
+  ],
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "directory": "apps/vscode"
+  },
+  "categories": ["Machine Learning", "Chat", "Other"],
+  "activationEvents": [],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dsh-sidebar",
+          "title": "DeepSeek Harness",
+          "icon": "media/logo.svg"
+        }
+      ]
+    },
+    "views": {
+      "dsh-sidebar": [
+        {
+          "type": "webview",
+          "id": "dsh.chatView",
+          "name": "Chat",
+          "visibility": "visible"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "dsh.newSession",
+        "title": "New Session",
+        "icon": "$(add)"
+      },
+      {
+        "command": "dsh.stop",
+        "title": "Stop",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "dsh.selectPreset",
+        "title": "Select API Preset",
+        "icon": "$(server-environment)"
+      },
+      {
+        "command": "dsh.addPreset",
+        "title": "Add API Preset",
+        "icon": "$(add)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "dsh.selectPreset",
+          "when": "view == dsh.chatView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "dsh.newSession",
+          "when": "view == dsh.chatView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "dsh.stop",
+          "when": "view == dsh.chatView && dsh.running == true",
+          "group": "navigation@3"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "DeepSeek Harness",
+      "properties": {
+        "dsh-vscode.runtimeCommand": {
+          "type": "string",
+          "default": "",
+          "description": "Command that runs the dsh-jsonrpc-agent runtime. Leave empty to auto-resolve the workspace package bin (node + dsh-sdk-jsonrpc-demo)."
+        },
+        "dsh-vscode.runtimeArgs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Extra arguments inserted before the cordis.yml path when launching the runtime."
+        },
+        "dsh-vscode.maxTokens": {
+          "type": ["number", "null"],
+          "default": null,
+          "description": "Optional output-token cap sent to the runtime for every turn."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "tsc -b tsconfig.json --pretty false"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-agent-spine-demo": "workspace:^",
+    "@deepseek-ai/dsh-bash-local": "workspace:^",
+    "@deepseek-ai/dsh-compaction-basic": "workspace:^",
+    "@deepseek-ai/dsh-credentials-local": "workspace:^",
+    "@deepseek-ai/dsh-fs-local": "workspace:^",
+    "@deepseek-ai/dsh-fs-observation-policy": "workspace:^",
+    "@deepseek-ai/dsh-llm-deepseek": "workspace:^",
+    "@deepseek-ai/dsh-llm-pi-ai": "workspace:^",
+    "@deepseek-ai/dsh-sdk-client": "workspace:^",
+    "@deepseek-ai/dsh-sdk-jsonrpc-demo": "workspace:^",
+    "@deepseek-ai/dsh-sdk-jsonrpc-server": "workspace:^",
+    "@deepseek-ai/dsh-sdk-protocol": "workspace:^",
+    "@deepseek-ai/dsh-session-checkpoint-policy": "workspace:^",
+    "@deepseek-ai/dsh-session-persistence-jsonl": "workspace:^",
+    "@deepseek-ai/dsh-session-projection": "workspace:^",
+    "@deepseek-ai/dsh-settings-file": "workspace:^",
+    "@deepseek-ai/dsh-subagent": "workspace:^",
+    "@deepseek-ai/dsh-subagent-acp": "workspace:^",
+    "@deepseek-ai/dsh-subagent-claude-code": "workspace:^",
+    "@deepseek-ai/dsh-subprocess-local": "workspace:^",
+    "@deepseek-ai/dsh-token-meter": "workspace:^",
+    "@deepseek-ai/dsh-tool-bash": "workspace:^",
+    "@deepseek-ai/dsh-tool-fs": "workspace:^",
+    "@deepseek-ai/dsh-tool-subagent": "workspace:^",
+    "@deepseek-ai/dsh-tool-todo": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.95.0",
+    "esbuild": "^0.25.0"
+  }
+}

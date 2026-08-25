@@ -149,3 +149,13 @@ Docs accompany every code change: update affected README and JSDoc contracts tog
 ## Vendoring policy
 
 `vendor/` packages are pinned source copies (manifest with upstream SHAs in [vendor/README.md](vendor/README.md)). Update via the sync procedure there; re-apply or retire the logged local modifications; rerun `pnpm run test && pnpm run build`.
+
+## Multi-instance coordination
+
+This repository is developed by a dedicated opencode instance ("Worker B", HTTP port 5020) coordinated by a supervisor instance over the local API.
+
+Shared coordination board (read before starting any task): `C:\Users\24357\Desktop\协作看板.md`
+
+1. Register a task as in-progress on the board before working on it; one task at a time.
+2. The repo has a git baseline commit; check `git status`/`git diff` scope before reporting completion, and log changed files on the board.
+3. Do not modify files under `C:\Users\24357\Desktop\AInovel Harness`; cross-project needs go on the board for the supervisor to split.

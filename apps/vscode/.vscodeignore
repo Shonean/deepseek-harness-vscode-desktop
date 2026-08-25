@@ -1,0 +1,12 @@
+.vscode-test/
+src/
+lib/
+scripts/
+tests/
+node_modules/
+tsconfig.json
+**/*.map
+**/*.ts
+!dist/**/*.js
+!runtime/**
+!media/**

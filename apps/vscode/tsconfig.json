@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib/types",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "types": ["node", "vscode"]
+  },
+  "include": ["src/**/*.ts"],
+  "references": [
+    { "path": "../../packages/sdk/client" },
+    { "path": "../../packages/sdk/protocol" }
+  ]
+}

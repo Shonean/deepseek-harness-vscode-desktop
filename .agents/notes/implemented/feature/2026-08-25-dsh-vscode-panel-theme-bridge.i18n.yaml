@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-25-dsh-vscode-panel-theme-bridge.md
+2026-08-25-dsh-vscode-panel-theme-bridge.md: c99dff2bca5e9315fd4a9efe64f34640677a01a3
+2026-08-25-dsh-vscode-panel-theme-bridge.zh.md: 7a190cc8b50e64c9d7e6e4de84467824af2a5672

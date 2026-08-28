@@ -1,20 +1,22 @@
-# dsh VSCode 集成 + opencode/Claude Code 子代理 — 设计
+# dsh VSCode integration + opencode/Claude Code subagents — design
 
-日期：2026-08-24 · 状态：已获用户批准
+English | [中文](2026-08-24-dsh-vscode-and-subagents-design.zh.md)
 
-## 目标
+Date: 2026-08-24 · Status: approved by the user
 
-1. 把 dsh 从"浏览器 Web UI"形态接入 VSCode：新增 `apps/vscode` 扩展，提供原生侧边栏聊天面板。
-2. 内置调用其它 agent 的能力：以子代理形式接入 **Claude Code**（现成包）与 **OpenCode**（现成通用 ACP 提供者 + `opencode acp`）。
-3. 主模型 API 可插拔：基于 `dsh-llm-pi-ai` 多 provider 适配器建立「API 预设库」，面板可随意切换。
+## Goals
 
-## 非目标（v1 明确不做）
+1. Bring dsh from the browser web UI into VSCode: a new `apps/vscode` extension providing a native sidebar chat panel.
+2. Call other agents from inside: integrate **Claude Code** (existing package) and **OpenCode** (existing generic ACP provider + `opencode acp`) as subagents.
+3. Pluggable main-model API: build an "API preset library" on the `dsh-llm-pi-ai` multi-provider adapters, switchable from the panel.
 
-- 跨进程会话续聊（SDK 服务端对同名 session 是新建而非 resume；改协议连带 Python SDK，单独立项）。
-- 中途取消 / 审批流（wire 协议未定义）；面板"停止"= 终止运行时进程。
-- 修改 agent-loop、GUI 现有栈或 SDK wire 协议。
+## Non-goals (explicitly out of v1)
 
-## 架构
+- Cross-process session resumption (the SDK server creates a new session for the same name rather than resuming; changing the protocol would touch the Python SDK and is a separate project).
+- Mid-run cancellation / approval flow (undefined by the wire protocol); the panel's "stop" terminates the runtime process.
+- Changes to agent-loop, the existing GUI stack, or the SDK wire protocol.
+
+## Architecture
 
 ```
 VSCode 扩展 (apps/vscode)
@@ -30,9 +32,9 @@ dsh 运行时子进程 = @deepseek-ai/dsh-sdk-jsonrpc-demo bin
       tool-subagent(claude-code, opencode) / jobs
 ```
 
-## 组件契约
+## Component contracts
 
-### ApiPreset（扩展侧数据）
+### ApiPreset (extension-side data)
 
 ```ts
 interface ApiPreset {
@@ -45,20 +47,20 @@ interface ApiPreset {
 }
 ```
 
-- 存储：workspace/global settings `dsh-vscode.apiPresets` + `dsh-vscode.activeApiPreset`。
-- 切换 = 以新 preset 的 `{provider, model}` 重启运行时并重新 `initialize({cwd, provider, model})`。
+- Storage: workspace/global settings `dsh-vscode.apiPresets` + `dsh-vscode.activeApiPreset`.
+- Switching = restart the runtime with the new preset's `{provider, model}` and re-run `initialize({cwd, provider, model})`.
 
-### HarnessController（扩展宿主）
+### HarnessController (extension host)
 
-- 懒启动运行时；`initialize` 一次连接一次；订阅 `session.event`/`session.status`/`subagent.*` 转发给 webview。
-- 停止按钮 → 关闭 client（stdin EOF→SIGTERM→SIGKILL 阶梯，client 自带）。
-- 多会话：同一进程内多个命名 sessionId 并存（服务端每 sessionId 一个 agent）；列表与标题存扩展侧 state。
+- Lazily starts the runtime; one `initialize` per connection; forwards `session.event`/`session.status`/`subagent.*` to the webview.
+- Stop button → close the client (stdin EOF→SIGTERM→SIGKILL ladder, built into the client).
+- Multi-session: multiple named sessionIds coexist in one process (the server keeps one agent per sessionId); the list and titles live in extension-side state.
 
-### 聊天面板（标准版范围）
+### Chat panel (standard-version scope)
 
-流式 Markdown 输出（assistant/chunk）、工具调用折叠行（tool/call→tool/result 状态）、子代理活动展示（工具行级）、文件路径点击跳转编辑器、会话列表、API 预设下拉、停止按钮。
+Streaming Markdown output (assistant/chunk), collapsible tool-call rows (tool/call→tool/result states), subagent activity display (tool-row level), file-path clicks opening the editor, session list, API preset dropdown, stop button.
 
-## 子代理配置（纯配置，零新代码）
+## Subagent configuration (pure config, zero new code)
 
 ```yaml
 - id: subagent-claude-code
@@ -76,15 +78,15 @@ interface ApiPreset {
   config: { provider: opencode, toolName: subagent_opencode }
 ```
 
-前置条件：本机已安装 `claude` 与 `opencode` CLI（用户确认已装）。子代理模型由各自原生配置决定。
+Prerequisite: the `claude` and `opencode` CLIs are installed locally (the user confirmed). Subagent models come from each tool's native configuration.
 
-## 已知限制
+## Known limitations
 
-1. 远程子代理无 `subagent.finished` 推送（仅本进程 run），外部子代理进度靠工具行状态。
-2. API key 经环境变量注入运行时进程；预设只存变量名。
-3. Windows 下进程树终止依赖 client 的 dispose 阶梯（已内建 force-terminate 分支）。
+1. Remote subagents emit no `subagent.finished` push (only in-process runs do); external subagent progress relies on tool-row state.
+2. API keys reach the runtime process through environment variables; presets store only variable names.
+3. On Windows, process-tree termination relies on the client's dispose ladder (a force-terminate branch is built in).
 
-## 验证
+## Verification
 
-- keyless：Loader smoke 启动真实 cordis.yml 验证组合合法；sdk/client 测试基建（fake-runtime）验证控制器消息管线。
-- 有 key（DEEPSEEK_API_KEY）：端到端——面板发任务 → 主代理派活 claude/opencode 子代理 → 结果回流渲染。
+- Keyless: the Loader smoke boots the real cordis.yml to validate composition; the sdk/client test infrastructure (fake-runtime) validates the controller message pipeline.
+- With a key (DEEPSEEK_API_KEY): end to end — the panel sends a task, the main agent delegates to claude/opencode subagents, and the results flow back and render.

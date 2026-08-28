@@ -154,6 +154,7 @@ describe('web panel tunnel host half', () => {
         sockets,
         createSocket: (url: string) => {
           const handlers = new Map<string, Array<(event: { data?: unknown }) => void>>()
+          let closedFlag = false
           const socket = {
             url,
             addEventListener: (type: string, listener: (event: { data?: unknown }) => void) => {
@@ -161,10 +162,12 @@ describe('web panel tunnel host half', () => {
               list.push(listener)
               handlers.set(type, list)
             },
-            close: () => { socket.fire('close') },
+            close: () => { closedFlag = true; socket.fire('close') },
             fire: (type: 'open' | 'message' | 'close' | 'error', data?: unknown) => {
+              if (type === 'close') closedFlag = true
               for (const listener of handlers.get(type) ?? []) listener({ data })
             },
+            closed: () => closedFlag,
           }
           sockets.push(socket)
           return socket as never

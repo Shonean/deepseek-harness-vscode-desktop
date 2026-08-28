@@ -328,6 +328,52 @@ describe('AppFrame — narrow-viewport auto-collapse', () => {
   })
 })
 
+describe('AppFrame — embedded carrier mode', () => {
+  // The global stub lands before any store creation inside each test,
+  // mirroring a real preload ordering.
+  beforeEach(() => { vi.stubGlobal('__DSH_TRANSPORT__', {}) })
+
+  it('drops the sidebar column entirely: zero track, no slot call, no rail state', () => {
+    const { frame, slotCalls } = mountFrame()
+    // The embedded frame is a two-track grid (center + details): a three-track
+    // template with the sidebar child absent would push the center into the
+    // zero-width sidebar track and leave the details column covering the
+    // viewport — a blank panel.
+    expect(frame.style.gridTemplateColumns).toBe('minmax(0, 1fr) 0px')
+    expect(frame.hasAttribute('data-sidebar-collapsed')).toBe(false)
+    expect(slotCalls.map(c => c.key)).not.toContain('sidebar')
+    expect(queryByTestId(document.body, 'sidebar-content')).toBeNull()
+  })
+
+  it('renders no sidebar drag handle even with details open', () => {
+    const { frame, instance } = mountFrame()
+    act(() => { instance.actions.openDetails() })
+    const handles = frame.querySelectorAll('[class*="handle"]')
+    expect(handles).toHaveLength(1)
+    expect(handles[0]!.getAttribute('data-side')).toBe('details')
+  })
+
+  it('details keep their full chain while the center starts from the whole frame', () => {
+    frameWidth = 970
+    const { frame, instance } = mountFrame()
+    act(() => { instance.actions.openDetails() })
+    expect(frame.style.gridTemplateColumns).toBe('minmax(0, 1fr) 330px')
+    expect(instance.getSnapshot().details).toBe(360)
+  })
+
+  it('toggleSidebar moves only its preference; nothing sidebar-shaped renders', () => {
+    const { frame, instance } = mountFrame()
+    act(() => { instance.actions.toggleSidebar() })
+    expect(instance.getSnapshot().sidebar).toBe(0)
+    expect(frame.style.gridTemplateColumns).toBe('minmax(0, 1fr) 0px')
+    expect(frame.querySelectorAll('[class*="handle"]')).toHaveLength(0)
+  })
+})
+
+function queryByTestId(root: ParentNode, id: string): Element | null {
+  return root.querySelector(`[data-testid="${id}"]`)
+}
+
 describe('AppFrame — guard branches', () => {
   it('pointer moves without capture are ignored (no width write)', () => {
     const { frame, instance } = mountFrame()

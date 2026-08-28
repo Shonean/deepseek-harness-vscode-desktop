@@ -6,14 +6,16 @@
  * renders HERE with live parameters from the concession solve, and the
  * session-aware occupants render in fixed column positions; strict entries
  * gate themselves on current-session availability while session-maybe
- * entries retain identity. Pure component: everything arrives
- * through the three framework shares — zero cordis or framework imports,
- * zero self-made hooks.
+ * entries retain identity. Under an embedded carrier (stores.ts freezes
+ * `embedded` at creation) the frame drops the sidebar column and its handle,
+ * leaving a center+details frame whose session navigation lives in the host
+ * UI. Pure component: everything arrives through the three framework shares —
+ * zero cordis or framework imports, zero self-made hooks.
  */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { PropsRenderSlots, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
-import { computeColumns, SIDEBAR_AUTO_COLLAPSE, SIDEBAR_DEFAULT } from './columns.ts'
+import { computeColumns, computeEmbeddedColumns, SIDEBAR_AUTO_COLLAPSE, SIDEBAR_DEFAULT } from './columns.ts'
 import type { createLayoutStore } from './stores.ts'
 import css from './AppFrame.module.css'
 
@@ -132,14 +134,19 @@ export function AppFrame({
   // re-expand override, stores.ts). Collapsed is decided here, so the
   // solver stays breakpoint-free: a narrow re-expand passes the preference
   // (or the default when the wide preference is closed) and the center
-  // absorbs the squeeze.
-  const narrow = viewport < SIDEBAR_AUTO_COLLAPSE
+  // absorbs the squeeze. The embedded mode renders no sidebar column at all,
+  // so its solve skips the sidebar input and every sidebar-only decision.
+  const embedded = useStore(s => s.embedded)
+  const narrow = !embedded && viewport < SIDEBAR_AUTO_COLLAPSE
   useEffect(() => { actions.setNarrow(narrow) }, [actions, narrow])
   const sidebarCollapsed = narrow ? !panels.narrowExpanded : panels.sidebar === 0
   const sidebarPreference = sidebarCollapsed
     ? 0
     : panels.sidebar === 0 ? SIDEBAR_DEFAULT : panels.sidebar
-  const cols = computeColumns(viewport, sidebarPreference, detailsSession === undefined ? 0 : panels.details)
+  const detailsPreference = detailsSession === undefined ? 0 : panels.details
+  const cols = embedded
+    ? computeEmbeddedColumns(viewport, detailsPreference)
+    : computeColumns(viewport, sidebarPreference, detailsPreference)
   const colsRef = useRef(cols)
   colsRef.current = cols
 
@@ -165,22 +172,29 @@ export function AppFrame({
     <div
       ref={frameRef}
       className={css.frame}
-      style={{ gridTemplateColumns: `${cols.sidebar}px minmax(0, 1fr) ${cols.details}px` }}
+      style={{ gridTemplateColumns: embedded
+        ? `minmax(0, 1fr) ${cols.details}px`
+        : `${cols.sidebar}px minmax(0, 1fr) ${cols.details}px` }}
       data-sidebar-collapsed={sidebarCollapsed || undefined}
       data-details-collapsed={cols.details === 0 || undefined}
       data-dragging={dragging || undefined}
     >
-      <div className={css.sidebarCol}>
-        {/* Render-site slot call with live concession output: a closed
-            sidebar keeps the mounted slot at the compact-rail width, and the
-            component sees its rendered state as owner params decided here
-            (collapsed follows the resolved rail, so a derived auto-collapse
-            renders the rail UI too). */}
-        {renderSlot('sidebar', {
-          collapsed: sidebarCollapsed,
-          width: cols.sidebar,
-        })}
-      </div>
+      {/* The embedded frame owns no sidebar column: the carrier host renders
+          session navigation itself, so the slot is left unrendered (its
+          registrants stay mounted and harmless). */}
+      {!embedded && (
+        <div className={css.sidebarCol}>
+          {/* Render-site slot call with live concession output: a closed
+              sidebar keeps the mounted slot at the compact-rail width, and the
+              component sees its rendered state as owner params decided here
+              (collapsed follows the resolved rail, so a derived auto-collapse
+              renders the rail UI too). */}
+          {renderSlot('sidebar', {
+            collapsed: sidebarCollapsed,
+            width: cols.sidebar,
+          })}
+        </div>
+      )}
       <>
         {/* Both column occupants stay at fixed tree positions from first
             paint — no loading gate: a bare status line reads worse than
@@ -194,7 +208,7 @@ export function AppFrame({
         {renderSlot('shell.overlay', {})}
       </div>
       {/* The collapsed rail is fixed-width: no resize handle while closed. */}
-      {!sidebarCollapsed && <DragHandle side="sidebar" left={cols.sidebar} onStart={onSidebarStart} onDrag={onSidebarDrag} onEnd={onDragEnd} />}
+      {!embedded && !sidebarCollapsed && <DragHandle side="sidebar" left={cols.sidebar} onStart={onSidebarStart} onDrag={onSidebarDrag} onEnd={onDragEnd} />}
       {cols.details > 0 && <DragHandle side="details" left={viewport - cols.details} onStart={onDetailsStart} onDrag={onDetailsDrag} onEnd={onDragEnd} />}
     </div>
   )

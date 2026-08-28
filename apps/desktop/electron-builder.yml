@@ -1,0 +1,25 @@
+appId: ai.deepseek.harness.desktop
+productName: DeepSeek Harness
+directories:
+  output: release
+files:
+  - dist/**
+  - media/**
+  - package.json
+  - '!**/*.map'
+  - '!scripts/**'
+# No asar: the desktop kernel spawns the system Node.js to run the dsh CLI,
+# and a stock Node cannot read app.asar. Real files keep the kernel bootable.
+asar: false
+afterPack: ./scripts/afterPack.mjs
+electronDist: D:/electron/dist
+electronVersion: 33.4.11
+npmRebuild: false
+win:
+  target:
+    - target: portable
+      arch:
+        - x64
+  icon: media/logo.ico
+portable:
+  artifactName: DeepSeek-Harness-${version}.exe

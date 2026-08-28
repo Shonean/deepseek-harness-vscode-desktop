@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  CENTER_MIN, clampWidth, computeColumns,
+  CENTER_MIN, clampWidth, computeColumns, computeEmbeddedColumns,
   DETAILS_DEFAULT, DETAILS_MIN, SIDEBAR_COLLAPSED, SIDEBAR_DEFAULT, SIDEBAR_MIN,
 } from '@deepseek-ai/dsh-client-ui-layout/src/client/columns.ts'
 
@@ -91,5 +91,25 @@ describe('computeColumns — degenerate viewports', () => {
     // Reaches step 3's auto-close with the compact rail sidebar.
     expect(computeColumns(500, closed(300), open(DETAILS_DEFAULT)))
       .toEqual({ sidebar: SIDEBAR_COLLAPSED, center: 500 - SIDEBAR_COLLAPSED, details: 0 })
+  })
+})
+
+describe('computeEmbeddedColumns', () => {
+  it('renders no sidebar track at all (no rail floor) and shares the details chain', () => {
+    const closedDetails = computeEmbeddedColumns(1920, closed(DETAILS_DEFAULT))
+    expect(closedDetails).toEqual({ sidebar: 0, center: 1920, details: 0 })
+    const openDetails = computeEmbeddedColumns(1920, open(DETAILS_DEFAULT))
+    expect(openDetails).toEqual({ sidebar: 0, center: 1920 - DETAILS_DEFAULT, details: DETAILS_DEFAULT })
+  })
+
+  it('step 2: details shrinks first, center pinned at min', () => {
+    // 0 + 360 + 640 = 1000 > 970: details concedes to 970 - 640 = 330.
+    expect(computeEmbeddedColumns(970, open(DETAILS_DEFAULT)))
+      .toEqual({ sidebar: 0, center: CENTER_MIN, details: 330 })
+  })
+
+  it('step 3: a tiny viewport auto-closes details and center absorbs everything', () => {
+    expect(computeEmbeddedColumns(500, open(DETAILS_DEFAULT)))
+      .toEqual({ sidebar: 0, center: 500, details: 0 })
   })
 })

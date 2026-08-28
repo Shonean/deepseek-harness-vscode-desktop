@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-24-dsh-vscode-sidebar-extension.md
-2026-08-24-dsh-vscode-sidebar-extension.md: 48797d6c589d185c6280988444241810e4886261
-2026-08-24-dsh-vscode-sidebar-extension.zh.md: 36cb784ea5229c157eaa23a18c35c0a61dd6f497
+2026-08-24-dsh-vscode-sidebar-extension.md: 578f6efbb6a679ae1d23be1ccb8247a4d42765a5
+2026-08-24-dsh-vscode-sidebar-extension.zh.md: e76f6e992d84cae273ec4c433b6fd79fd6a39d84

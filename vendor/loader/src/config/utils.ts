@@ -1,12 +1,18 @@
 import { valueMap } from '@deepseek-ai/cosmokit'
 
 // eslint-disable-next-line no-new-func
+/** Compiled evaluator; built on first use so importing this module never compiles code. */
+let compiled: ((ctx: object, expr: string) => any) | undefined
+
 /** Evaluate a JavaScript expression against a loader context scope. */
-export const evaluate = new Function('ctx', 'expr', `
+export function evaluate(ctx: object, expr: string): any {
+  compiled ??= new Function('ctx', 'expr', `
   with (ctx) {
     return eval(expr)
   }
 `) as ((ctx: object, expr: string) => any)
+  return compiled(ctx, expr)
+}
 
 /** Recursively replace YAML `!js` expression nodes with evaluated values. */
 export function interpolate(ctx: object, value: any) {

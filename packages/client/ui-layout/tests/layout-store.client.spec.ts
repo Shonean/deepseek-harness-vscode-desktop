@@ -5,7 +5,7 @@
  * test-sanctioned path: factory self-call + .create() gives the
  * real engine instance (same create path as production).
  */
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
 import { createLayoutStore } from '@deepseek-ai/dsh-client-ui-layout/src/client/stores.ts'
 import {
   DETAILS_DEFAULT, DETAILS_MAX, DETAILS_MIN,
@@ -15,11 +15,18 @@ import {
 const PERSIST_KEY = 'dsh.layout.panels'
 
 beforeEach(() => { localStorage.clear() })
+afterEach(() => { vi.unstubAllGlobals() })
 
 describe('createLayoutStore', () => {
-  it('initializes the sidebar at its default width, details closed, wide viewport assumed', () => {
+  it('initializes the sidebar at its default width, details closed, wide viewport assumed, plain web mode', () => {
     const { store } = createLayoutStore().create()
-    expect(store.getSnapshot()).toEqual({ sidebar: SIDEBAR_DEFAULT, details: 0, narrow: false, narrowExpanded: false })
+    expect(store.getSnapshot()).toEqual({ sidebar: SIDEBAR_DEFAULT, details: 0, narrow: false, narrowExpanded: false, embedded: false })
+  })
+
+  it('freezes the embedded flag at creation when a transport carrier is installed', () => {
+    vi.stubGlobal('__DSH_TRANSPORT__', {})
+    const { store } = createLayoutStore().create()
+    expect(store.getSnapshot().embedded).toBe(true)
   })
 
   it('each create() is an independent instance (factory is not a singleton)', () => {
@@ -55,7 +62,7 @@ describe('createLayoutStore', () => {
     actions.setSidebar(400)
     actions.setNarrow(true)
     actions.toggleSidebar()
-    expect(store.getSnapshot()).toEqual({ sidebar: 400, details: 0, narrow: true, narrowExpanded: true })
+    expect(store.getSnapshot()).toEqual({ sidebar: 400, details: 0, narrow: true, narrowExpanded: true, embedded: false })
     actions.toggleSidebar()
     expect(store.getSnapshot().narrowExpanded).toBe(false)
     expect(store.getSnapshot().sidebar).toBe(400)
@@ -98,6 +105,7 @@ describe('createLayoutStore', () => {
       details: 0,
       narrow: false,
       narrowExpanded: false,
+      embedded: false,
     })
   })
 })

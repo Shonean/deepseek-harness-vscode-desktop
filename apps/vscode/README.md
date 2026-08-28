@@ -1,27 +1,42 @@
 # @deepseek-ai/dsh-vscode
 
-Native VSCode sidebar chat for the DeepSeek Harness runtime. The extension
-spawns the dsh JSON-RPC runtime as a child process, communicates over stdio
-NDJSON JSON-RPC through `@deepseek-ai/dsh-sdk-client`, and renders streaming
-output, tool calls, and subagent activity in a webview panel.
+English | [中文](README.zh.md)
+
+DeepSeek Harness inside VSCode: a slim session sidebar in the activity bar and
+the full web chat surface in an editor panel. The extension spawns the local
+`dsh web` kernel as a child process bound to `127.0.0.1` on an ephemeral port,
+then loads the real web SPA into a webview. The webview never reaches the
+network itself — the extension host relays every request to loopback over a
+postMessage tunnel, so there is no CORS surface and the kernel stays
+single-origin.
+
+The activity-bar sidebar is the only session surface: its new-session button
+and session list drive the panel, and the embedded SPA hides its own sidebar
+column (ui-layout's carrier mode reacts to the `window.__DSH_TRANSPORT__`
+marker this extension installs), so VSCode shows exactly one "New session"
+and one session list at all times.
 
 ## Layout
 
-- `src/extension.ts` — activation, command registration, and wiring.
-- `src/harness-controller.ts` — owns one runtime subprocess and routes its
-  notifications to named chat sessions; switching API preset restarts it.
-- `src/preset-store.ts` — CRUD over the ainovel preset library at
-  `~/.claude/ainovel-write/api_library.json` (`text_presets[].fields` with the
-  `ARK_API_KEY` / `ARK_BASE_URL` / `ARK_MODEL_PRO` keys, `current_text_id` as
-  the active selection). Preset values are injected as environment variables
-  into the runtime process; the store itself never resolves them.
-- `src/chat-view.ts` — self-contained webview (no external network) with the
-  chat transcript, session switcher, preset dropdown, and stop button.
-- `src/runtime-resolver.ts` — locates the `dsh-jsonrpc-agent` bin and the
-  bundled `runtime/cordis.yml`.
-- `runtime/cordis.yml` — the composition loaded into the runtime: JSON-RPC
-  server, DeepSeek + pi-ai multi-provider LLM, bash/fs tools, persistence,
-  compaction, and Claude Code / OpenCode subagent tools.
+- `src/extension.ts` — activation, command registration, broker wiring.
+- `src/kernel-broker.ts` — owns the one shared kernel child process and a
+  loopback API client; lists and creates sessions and polls for changes.
+- `src/kernel.ts` — spawns `dsh --profile web --no-open --port 0`, parses its
+  loopback URL, and reaps the process tree on disposal.
+- `src/tunnel.ts` — host half of the panel tunnel: relays webview fetches to
+  the kernel and streams response bodies back as postMessage frames; owns one
+  host WebSocket per kernel downlink (`/api/events.mux`, `/api/events.host`)
+  and relays its text frames, so the SPA's live session events reach the
+  panel despite the webview's no-network CSP.
+- `src/webview-transport.ts` — browser half, bundled to
+  `dist/webview-transport.js`; installs `window.__DSH_TRANSPORT__` so the SPA
+  boots over the tunnel.
+- `src/web-panel.ts` — the editor-area `WebviewPanel` hosting the SPA, seeded
+  to a target session through the SPA's persisted selection.
+- `src/sidebar-view.ts` — the slim sidebar: new-session button and session
+  list; selecting a row opens the full panel for that session.
+- `src/webview-index.ts` — pure index rewriting: root-relative asset URLs to
+  webview URIs, CSP, transport/seed injection, and the theme bridge script.
 
 ## Building
 
@@ -29,11 +44,46 @@ output, tool calls, and subagent activity in a webview panel.
 pnpm --filter @deepseek-ai/dsh-vscode run build
 ```
 
-This bundles `src/extension.ts` to `dist/extension.cjs` with esbuild. The
-runtime packages it spawns must be built first (`pnpm run build:lib:host`).
+esbuild emits two bundles: `dist/extension.cjs` (CJS, `vscode` externalized)
+and `dist/webview-transport.js` (browser IIFE). The kernel CLI and the web
+frontend dist it serves are workspace dependencies and must be built first
+(`pnpm run build` from the repository root).
+
+## Packing a VSIX
+
+```sh
+pnpm --filter @deepseek-ai/dsh-vscode run pack:vsix
+```
+
+Writes `dist/dsh-vscode-<version>.vsix` derived from the publish tarball
+(`pnpm pack`): the VSIX carries exactly what the published npm package
+carries. Re-packing the same version replaces the previous output.
+
+## Settings
+
+- `dsh-vscode.uiLocale` — sidebar and panel UI language: `auto` follows
+  VSCode's display language, `en` English, `zh-cn` 简体中文. Changing it
+  reloads the sidebar.
+
+## Theme
+
+The panel follows VSCode's active color theme. The SPA resolves its `system`
+preference through `matchMedia('(prefers-color-scheme: dark)')`, so the
+extension injects a bridge script that answers color-scheme queries from the
+VSCode theme kind instead, and pushes live updates through a
+`dsh.vscodeTheme` message whenever the active theme changes.
+
+## Commands
+
+- `DeepSeek Harness: Open DeepSeek Harness` (`dsh.openChat`) — open the full
+  panel.
+- `DeepSeek Harness: New DeepSeek Harness Session` (`dsh.newSession`) — create
+  a session and open it in the panel.
+- `DeepSeek Harness: Close DeepSeek Harness` (`dsh.closeChat`) — close the
+  panel (the shared kernel keeps running for the sidebar).
 
 ## Requirements
 
-The bundled composition mounts `@deepseek-ai/dsh-subagent-claude-code` and
-`@deepseek-ai/dsh-subagent-acp` (OpenCode). Their native CLIs (`claude` and
-`opencode`) must be on `PATH` for the corresponding delegation tools to run.
+The kernel is the standard `dsh web` stack; LLM credentials and tool CLIs are
+configured through the harness's own settings and environment, not the
+extension.

@@ -8,6 +8,9 @@
  * deficit as the last resort. Inputs are the layout store's plain width
  * preferences (0 = closed); a closed sidebar resolves to the fixed
  * SIDEBAR_COLLAPSED control rail while closed details resolve to zero width.
+ * {@link computeEmbeddedColumns} serves the embedded-carrier frame mode,
+ * which renders no sidebar column at all (the host UI owns session
+ * navigation) and shares the same details chain from a zero-width start.
  * The SIDEBAR_AUTO_COLLAPSE breakpoint is consumed by AppFrame, which decides
  * the effective sidebar preference before solving; the solver itself stays
  * breakpoint-free.
@@ -62,6 +65,26 @@ export function clampWidth(px: number, min: number, max: number): number {
 export function computeColumns(viewport: number, sidebar: number, details: number): Columns {
   // The sidebar is fixed at its preference (or the rail) — it never concedes.
   const s = sidebar === 0 ? SIDEBAR_COLLAPSED : clampWidth(sidebar, SIDEBAR_MIN, SIDEBAR_MAX)
+  return solveDetailsChain(viewport, s, details)
+}
+
+/**
+ * Embedded-frame variant: no sidebar column exists, so no rail floor applies
+ * and the center starts from the full viewport. Pure; same chain as
+ * {@link computeColumns} otherwise.
+ * @param viewport - available frame width in px.
+ * @param details - details width preference in px (0 = closed).
+ * @returns resolved widths with a zero sidebar track.
+ */
+export function computeEmbeddedColumns(viewport: number, details: number): Columns {
+  return solveDetailsChain(viewport, 0, details)
+}
+
+/**
+ * The shared concession steps after the sidebar width is resolved (the only
+ * step where the two frame modes differ). Mutates nothing.
+ */
+function solveDetailsChain(viewport: number, s: number, details: number): Columns {
   const d0 = details === 0 ? 0 : clampWidth(details, DETAILS_MIN, DETAILS_MAX)
 
   // Step 1: everything fits at preferred widths.

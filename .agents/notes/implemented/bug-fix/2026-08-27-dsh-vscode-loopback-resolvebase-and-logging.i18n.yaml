@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-08-27-dsh-vscode-loopback-resolvebase-and-logging.md
+2026-08-27-dsh-vscode-loopback-resolvebase-and-logging.md: 868cf7754ac6c7c818ce9c991bae15df2357745c
+2026-08-27-dsh-vscode-loopback-resolvebase-and-logging.zh.md: c687a7fd82e0b6bbca9eb6154b83ae06894d2839

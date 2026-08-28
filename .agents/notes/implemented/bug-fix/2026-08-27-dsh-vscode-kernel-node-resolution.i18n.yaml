@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-08-27-dsh-vscode-kernel-node-resolution.md
+2026-08-27-dsh-vscode-kernel-node-resolution.md: 1cedcd2eba45f9dca6f7ea188514ac051d632d76
+2026-08-27-dsh-vscode-kernel-node-resolution.zh.md: 4a92084f4694c72385aaf3f12ab8c6670b327002

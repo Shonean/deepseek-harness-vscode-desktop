@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-08-27-vscode-panel-black-screen-grid-tracks.md
+2026-08-27-vscode-panel-black-screen-grid-tracks.md: f803641709563f222a253c5034f6f4e90ffc5f30
+2026-08-27-vscode-panel-black-screen-grid-tracks.zh.md: f305d0a576043843b45db61e558814d2e716eb26

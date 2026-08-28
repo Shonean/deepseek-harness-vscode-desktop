@@ -1,0 +1,37 @@
+{
+  "name": "@deepseek-ai/dsh-desktop",
+  "productName": "DeepSeek Harness",
+  "description": "DeepSeek Harness desktop shell: an Electron main process, a kernel utilityProcess child, and the built web SPA over a typed MessagePort carrier.",
+  "version": "0.1.0-rc.0",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "directory": "apps/desktop"
+  },
+  "type": "module",
+  "main": "./dist/main.js",
+  "files": [
+    "dist",
+    "!dist/**/*.map"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "tsc -b tsconfig.json --pretty false",
+    "dev": "node scripts/build.mjs && electron .",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh": "workspace:^",
+    "@deepseek-ai/dsh-web-frontend": "workspace:^"
+  },
+  "devDependencies": {
+    "@deepseek-ai/dsh-host-apiproxy": "workspace:^",
+    "@types/node": "^22.0.0",
+    "electron": "^33.0.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^6.0.3"
+  }
+}

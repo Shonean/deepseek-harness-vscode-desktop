@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-25-dsh-vscode-panel-locale-and-session-selection.md
+2026-08-25-dsh-vscode-panel-locale-and-session-selection.md: e87af1612f9c224e4bceda50d1477fcc482bd05b
+2026-08-25-dsh-vscode-panel-locale-and-session-selection.zh.md: 17b3aaf569137c6e548f1136651378f0ce79cf3b

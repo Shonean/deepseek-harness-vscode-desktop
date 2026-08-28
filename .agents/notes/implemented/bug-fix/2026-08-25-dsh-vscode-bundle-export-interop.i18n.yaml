@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-08-25-dsh-vscode-bundle-export-interop.md
+2026-08-25-dsh-vscode-bundle-export-interop.md: 2f5ee2870240667b2e8cb4df83c0b6c0efacf237
+2026-08-25-dsh-vscode-bundle-export-interop.zh.md: 7d4b54347a0b1e4a02651391fadb4d7d5520cf4a

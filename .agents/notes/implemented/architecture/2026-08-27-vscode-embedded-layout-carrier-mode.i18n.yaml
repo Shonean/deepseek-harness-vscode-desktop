@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-08-27-vscode-embedded-layout-carrier-mode.md
+2026-08-27-vscode-embedded-layout-carrier-mode.md: 6c6e5d34a7115a27e04302ebcb271b7ffe13f858
+2026-08-27-vscode-embedded-layout-carrier-mode.zh.md: 25cf487b70cbe029667f95d6ee3fb1e929e4df16

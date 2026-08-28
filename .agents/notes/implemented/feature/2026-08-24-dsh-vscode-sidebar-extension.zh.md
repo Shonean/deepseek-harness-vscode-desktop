@@ -36,8 +36,8 @@ dsh 此前只有 CLI、headless、ACP 和浏览器 Web 形态，没有编辑器�
 
 ## 验证
 
-无密钥包测试用 fake harness 驱动 `HarnessController`：首次提示词懒启动、活动预设变更模型或 base URL 时重启、未选预设时拒绝、停止时终止运行时。一条 smoke spec 在 tsx 下启动真实捆绑的 `cordis.yml`，经 stdio 初始化，对本地 stub 模型服务器发送提示词，断言两个委托工具出现在请求载荷中，并以退出码 0 干净关闭。类型检查、lint、knip 与 workspace constraints 覆盖包面；真实 API 端到端需要 `DEEPSEEK_API_KEY` 加本机安装的 `claude` 与 `opencode`。
+无密钥包测试用 fake harness 驱动 `HarnessController`：首次提示词懒启动、活动预设变更模型或 base URL 时重启、未选预设时拒绝、停止时终止运行时。一条 smoke spec 在 tsx 下启动真实捆绑的 `cordis.yml`，经 stdio 初始化，对本地 stub 模型服务器发送提示词，断言两个委托工具出现在请求载荷中，并以退出码 0 干净关闭。一条 OpenRouter e2e 用 opencode 的已登录密钥经同一捆绑组合完成一个真实回合，无密钥时自行跳过。类型检查、lint、knip 与 workspace constraints 覆盖包面；真实 API 端到端需要 `DEEPSEEK_API_KEY` 加本机安装的 `claude` 与 `opencode`。
 
 ## 后果
 
-凭证存放在用户主目录 ainovel 的明文文件中；该文件早于扩展存在并仍是它的契约，因此没有新增秘密存储，但扩展能读到它们。外部子代理没有 `subagent.finished` 通知，其进度只能经由所属工具行的状态呈现。跨进程会话续聊仍在范围之外——SDK 服务端对同名会话是新建而非恢复——关闭 VSCode 会放弃进行中的回合，历史只能经持久化的 JSONL 日志回放，面板不能。发布遵循仓库的 npm release-member 政策（public access、无 source maps、`dist` + `runtime` + `media` 载荷），而非市场 VSIX 流水线；从已发布 tarball 构建 VSIX 仍是后续工作。Windows 下的进程树终止依赖 client 的升级阶梯，单元 fake 对它的覆盖只是间接的。
+凭证存放在用户主目录 ainovel 的明文文件中；该文件早于扩展存在并仍是它的契约，因此没有新增秘密存储，但扩展能读到它们。外部子代理没有 `subagent.finished` 通知，其进度只能经由所属工具行的状态呈现。跨进程会话续聊仍在范围之外——SDK 服务端对同名会话是新建而非恢复——关闭 VSCode 会放弃进行中的回合，历史只能经持久化的 JSONL 日志回放，面板不能。发布遵循仓库的 npm release-member 政策（public access、无 source maps、`dist` + `runtime` + `media` 载荷），可安装的 VSIX 从同一 tarball 打包（[VSIX 打包](../process/2026-08-25-dsh-vscode-vsix-from-publish-tarball.zh.md)）。Windows 下的进程树终止依赖 client 的升级阶梯，单元 fake 对它的覆盖只是间接的。

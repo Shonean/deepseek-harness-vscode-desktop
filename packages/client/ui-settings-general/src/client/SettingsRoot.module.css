@@ -41,6 +41,31 @@
   border-radius: 50%;
 }
 
+/* Embedded-carrier anchor (shell.overlay occupant): a floating rail gear at
+   the frame's top-right. The layer is click-through; this anchor opts back
+   in. When the details panel is open it occupies the frame's right edge, so
+   the anchor offsets by its width — ui-layout exposes that width as the
+   --dsh-details-w custom property (0 when the panel is collapsed). The
+   trigger's sidebar-foot margin does not apply on the floating surface. */
+.overlayEntry {
+  position: absolute;
+  top: 10px;
+  right: calc(var(--dsh-details-w, 0px) + 12px);
+  z-index: 21;
+  pointer-events: auto;
+}
+
+.overlayEntry .trigger.rail {
+  margin: 0;
+  background: var(--dsw-alias-button-floating-fill);
+  border: 1px solid var(--dsw-alias-border-l2-darkmode-thin);
+  box-shadow: var(--dsw-shadow-lv1);
+}
+
+.overlayEntry .trigger.rail:hover {
+  background: var(--dsw-alias-button-floating-hover);
+}
+
 .triggerLabel {
   overflow: hidden;
   white-space: nowrap;

@@ -13,7 +13,7 @@ function panelLocale(): UiLocale {
 }
 
 export function activate(context: ExtensionContext): void {
-  const channel: OutputChannel = window.createOutputChannel('DeepSeek Harness')
+  const channel: OutputChannel = window.createOutputChannel('DSH')
   bindLog(channel)
   context.subscriptions.push(channel)
 

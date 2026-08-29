@@ -16,7 +16,7 @@ describe('web panel index rewriting', () => {
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>DeepSeek Harness</title>
+<title>DSH</title>
 <script>window.__DSH_BOOT__ = {"modules":[]};</script>
 <script type="module" src="/assets/index-abc123.js"></script>
 <link rel="stylesheet" href="/assets/index-abc123.css">
@@ -258,7 +258,7 @@ describe('theme bridge script', () => {
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>DeepSeek Harness</title>
+<title>DSH</title>
 <script type="module" src="/assets/index-abc123.js"></script>
 </head>
 <body><div id="root"></div></body>

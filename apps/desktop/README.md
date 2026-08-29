@@ -1,19 +1,24 @@
-# @deepseek-ai/dsh-desktop
+# DSH Desktop
+
+[![Unofficial](https://img.shields.io/badge/DeepSeek%20Harness-unofficial%20community%20build-f6b5c8)](https://github.com/deepseek-ai/deepseek-harness)
+[![Upstream](https://img.shields.io/badge/upstream-deepseek--ai%2Fdeepseek--harness-blue)](https://github.com/deepseek-ai/deepseek-harness)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 English | [中文](README.zh.md)
 
-DeepSeek Harness desktop shell on Electron: a Node main process owns the native
-window, a `utilityProcess` child hosts the local `dsh --profile web` kernel,
-and the built web SPA renders from a custom-scheme origin with
-`contextIsolation` on. The renderer never reaches the network — its API
-traffic rides a typed `MessagePort` carrier into the main process, which
-relays it to the kernel child's loopback URL. The design is recorded in the
-[desktop-shell Agent Note](../../.agents/notes/proposed/architecture/2026-08-25-dsh-desktop-electron-shell.md).
+**DSH Desktop** is [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH) as a native desktop app — not a browser tab. A Node/Electron main process owns the native window, a `utilityProcess` child hosts the local `dsh --profile web` kernel, and the built web SPA renders from a custom-scheme origin with `contextIsolation` on. The renderer never reaches the network — its API traffic rides a typed `MessagePort` carrier into the main process, which relays it to the kernel child's loopback URL.
+
+> This is an **unofficial community build**, maintained by [@Shonean](https://github.com/Shonean). It is not published, endorsed, or supported by DeepSeek. "DeepSeek Harness" is a trademark of DeepSeek; this app only bundles and configures the upstream open-source project.
+
+Windows portable builds (`DSH-Desktop-<version>.exe`) are published on the [Releases page](https://github.com/Shonean/deepseek-harness-vscode-desktop/releases). Requirements: Node.js `^22.19 || >=24` on the PATH (the kernel runs on the system Node, not Electron's bundled one) and DSH credentials configured through the in-app settings gear.
+
+The design is recorded in the [desktop-shell Agent Note](../../.agents/notes/proposed/architecture/2026-08-25-dsh-desktop-electron-shell.md).
 
 This package is the D2 milestone: the app shell, kernel supervision with
 automatic restart, the typed carrier, and the native chrome — application
 menu, tray, `dsh://` deep links, and turn-end notifications. It is coherent
-and tested but is not packaged, signed, or auto-updated (D3).
+and tested; Windows portable packaging works (D3), while signing, notarization,
+and auto-update remain deferred.
 
 ## Layout
 
@@ -127,10 +132,18 @@ package per the spec.
   path resolver, kernel argv/URL parser, the host-half tunnel relay, the menu
   template, deep-link parsing, and the turn-end SSE matcher.
 
+## Packaging (Windows portable)
+
+`scripts/package-win.cmd` runs electron-builder against `electron-builder.yml`
+and writes `release/DSH-Desktop-<version>.exe` — a single self-contained
+portable executable (asar disabled so the system-Node kernel can read the
+bundle). The app id is `com.shonean.dsh-desktop` and the product name is
+`DSH Desktop`; the build is unsigned.
+
 ## Roadmap
 
-- **D3 — packaging**: electron-builder Windows artifact (unsigned then
-  signed), auto-update scaffolding, macOS signing/notarization through CI.
+- **D3 remainder**: signed Windows artifacts, auto-update scaffolding, macOS
+  signing/notarization through CI.
 - **Deferred**: replace the grandchild CLI with an in-process kernel boot
   (needs a programmatic `dsh` boot entry) and extract the shared host-half
   carrier package, per the desktop-shell spec.
@@ -140,10 +153,13 @@ package per the spec.
 - The kernel runs as a `utilityProcess` that supervises the `dsh` CLI bin,
   not as an in-process Cordis tree; the no-loopback-listener shape is a
   deferred refinement that needs a programmatic `dsh` boot entry.
+- The packaged app still needs a system Node.js on the PATH and resolves the
+  kernel's runtime closure from the bundle; a fully self-contained runtime
+  payload is follow-up work.
 - Native file dialogs are not yet wired to the SPA's `host.openPath` /
   directory-picker seams; that rides a host-tool bridge and is deferred.
 - `electron` must be installed (`corepack pnpm install`) before
   `corepack pnpm start`. Its postinstall downloads the matching runtime
   binary over the network, which this checkout cannot do in a sandboxed
   environment; type-checking and tests do not require the binary.
-- No packaging, signing, notarization, or auto-update — all D3.
+- No code signing, notarization, or auto-update yet.

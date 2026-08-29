@@ -1,14 +1,20 @@
-# @deepseek-ai/dsh-desktop
+# DSH Desktop
+
+[![非官方](https://img.shields.io/badge/DeepSeek%20Harness-非官方社区构建-f6b5c8)](https://github.com/deepseek-ai/deepseek-harness)
+[![上游](https://img.shields.io/badge/上游-deepseek--ai%2Fdeepseek--harness-blue)](https://github.com/deepseek-ai/deepseek-harness)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 [English](README.md) | 中文
 
-DeepSeek Harness 的 Electron 桌面外壳：Node 主进程拥有原生窗口，一个
-`utilityProcess` 子进程承载本地 `dsh --profile web` 内核，构建好的 web
-SPA 从自定义 scheme 源渲染并开启 `contextIsolation`。渲染进程完全不接触网络——
-其 API 流量经类型化的 `MessagePort` 载体进入主进程，再由主进程中继到内核子进程的
-回环 URL。设计记录在[桌面外壳 Agent Note](../../.agents/notes/proposed/architecture/2026-08-25-dsh-desktop-electron-shell.zh.md)。
+**DSH Desktop** 把 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（DSH）做成原生桌面应用——不是浏览器标签页。Node/Electron 主进程拥有原生窗口，一个 `utilityProcess` 子进程承载本地 `dsh --profile web` 内核，构建好的 web SPA 从自定义 scheme 源渲染并开启 `contextIsolation`。渲染进程完全不接触网络——其 API 流量经类型化的 `MessagePort` 载体进入主进程，再由主进程中继到内核子进程的回环 URL。
 
-本包是 D2 里程碑：应用外壳、带自动重启的内核监管、类型化载体，以及原生 chrome——应用菜单、系统托盘、`dsh://` 深链与回合结束通知。代码连贯且有测试，但尚未打包、签名或自动更新（D3）。
+> 这是**非官方社区构建**，由 [@Shonean](https://github.com/Shonean) 维护，不由 DeepSeek 发布、背书或提供支持。「DeepSeek Harness」是 DeepSeek 的商标；本应用仅打包并配置上游开源项目。
+
+Windows 便携版（`DSH-Desktop-<version>.exe`）在 [Releases 页面](https://github.com/Shonean/deepseek-harness-vscode-desktop/releases)发布。前置要求：PATH 上有 Node.js `^22.19 || >=24`（内核跑在系统 Node 上，而非 Electron 自带 Node），并通过应用内设置齿轮配置 DSH 凭据。
+
+设计记录在[桌面外壳 Agent Note](../../.agents/notes/proposed/architecture/2026-08-25-dsh-desktop-electron-shell.zh.md)。
+
+本包是 D2 里程碑：应用外壳、带自动重启的内核监管、类型化载体，以及原生 chrome——应用菜单、系统托盘、`dsh://` 深链与回合结束通知。代码连贯且有测试；Windows 便携打包已可用（D3），签名、公证与自动更新仍延后。
 
 ## 目录结构
 
@@ -94,10 +100,16 @@ web 组合（去掉 `dsh-host-webserver`）替换孙进程 CLI，并按规格把
 - 纯逻辑面的单元测试：协议收窄器、文档构建器、路径解析器、内核 argv/URL 解析器、
   宿主半侧载体中继、菜单模板、深链解析与回合结束 SSE 匹配。
 
+## 打包（Windows 便携版）
+
+`scripts/package-win.cmd` 用 `electron-builder.yml` 跑 electron-builder，写出
+`release/DSH-Desktop-<version>.exe`——单个自包含便携可执行文件（关闭 asar，
+以便系统 Node 内核能读取包内文件）。app id 为 `com.shonean.dsh-desktop`，
+产品名为 `DSH Desktop`；构建未签名。
+
 ## 路线图
 
-- **D3 — 打包**：electron-builder Windows 产物（先未签名后签名）、自动更新脚手架、
-  macOS 签名/公证经 CI 完成。
+- **D3 剩余**：Windows 签名产物、自动更新脚手架、macOS 签名/公证经 CI 完成。
 - **延后**：用进程内内核启动替换孙进程 CLI（需 `dsh` 提供编程式启动入口），并按
   桌面外壳规格抽取共享的宿主半侧载体包。
 
@@ -105,8 +117,10 @@ web 组合（去掉 `dsh-host-webserver`）替换孙进程 CLI，并按规格把
 
 - 内核作为监管 `dsh` CLI bin 的 `utilityProcess` 启动，而非进程内 Cordis 树；
   无回环监听的形态需要 `dsh` 编程式启动入口，属延后改进。
+- 打包后的应用仍需 PATH 上有系统 Node.js，并从包内解析内核运行时闭包；
+  完全自包含的运行时负载是后续工作。
 - 原生文件对话框尚未接入 SPA 的 `host.openPath` / 目录选择器缝；该能力依赖
   host 工具桥，暂延后。
 - `corepack pnpm start` 之前必须先 `corepack pnpm install` 安装 `electron`。其
   postinstall 经网络下载匹配的运行时二进制，沙箱环境无法完成；类型检查与测试不需要该二进制。
-- 暂无打包、签名、公证或自动更新——全部在 D3。
+- 暂无代码签名、公证或自动更新。

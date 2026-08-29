@@ -13,7 +13,7 @@
  * zero cordis or framework imports, zero self-made hooks.
  */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import type { PropsRenderSlots, PropsRuntime, PropsStore } from '@deepseek-ai/dsh-client-ui-slots'
 import { computeColumns, computeEmbeddedColumns, SIDEBAR_AUTO_COLLAPSE, SIDEBAR_DEFAULT } from './columns.ts'
 import type { createLayoutStore } from './stores.ts'
@@ -172,9 +172,15 @@ export function AppFrame({
     <div
       ref={frameRef}
       className={css.frame}
-      style={{ gridTemplateColumns: embedded
-        ? `minmax(0, 1fr) ${cols.details}px`
-        : `${cols.sidebar}px minmax(0, 1fr) ${cols.details}px` }}
+      style={{
+        gridTemplateColumns: embedded
+          ? `minmax(0, 1fr) ${cols.details}px`
+          : `${cols.sidebar}px minmax(0, 1fr) ${cols.details}px`,
+        // The details panel width as a frame custom property, so frame-level
+        // overlay entries (the embedded settings gear) offset from the
+        // details edge instead of painting over the open panel.
+        '--dsh-details-w': `${cols.details}px`,
+      } as CSSProperties}
       data-sidebar-collapsed={sidebarCollapsed || undefined}
       data-details-collapsed={cols.details === 0 || undefined}
       data-dragging={dragging || undefined}

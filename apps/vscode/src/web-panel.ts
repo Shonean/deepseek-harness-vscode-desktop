@@ -1,4 +1,3 @@
-import { createRequire } from 'node:module'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import {
@@ -8,6 +7,7 @@ import {
 import { log, logError } from './log.ts'
 import type { KernelBroker } from './kernel-broker.ts'
 import { attachWebTunnel } from './tunnel.ts'
+import { resolveFrontendIndex } from './runtime-resolution.ts'
 import {
   buildPanelHtml, inlinePluginScripts, panelCsp, panelProbeScript, pluginCachePath,
   pluginScriptPaths, rewriteIndexUrls, rewritePluginUrls, themeBridgeScript,
@@ -23,10 +23,9 @@ import {
  * @module web-panel
  */
 
-/** Resolve the built frontend dist index through workspace node_modules. */
+/** Resolve the built frontend dist index, closure first then workspace. */
 function resolveDistIndex(extensionRoot: string): string {
-  const nodeRequire = createRequire(join(extensionRoot, 'package.json'))
-  return nodeRequire.resolve('@deepseek-ai/dsh-web-frontend/dist/index.html')
+  return resolveFrontendIndex(extensionRoot).index
 }
 
 /** localStorage key the SPA reads to restore its current session on boot. */
@@ -198,12 +197,12 @@ class WebChatPanel {
 
     await window.withProgress({
       location: ProgressLocation.Notification,
-      title: 'Starting DeepSeek Harness web kernel…',
+      title: 'Starting DSH web kernel…',
     }, () => broker.start())
 
     const webviewPanel = window.createWebviewPanel(
       'dsh.chatFull',
-      'DeepSeek Harness',
+      'DSH',
       { viewColumn: ViewColumn.One, preserveFocus: false },
       {
         enableScripts: true,

@@ -1,20 +1,20 @@
 @echo off
 setlocal
 rem ============================================================
-rem DeepSeek Harness - Windows portable packaging (electron-builder)
+rem DSH Desktop - Windows portable packaging (electron-builder)
 rem Run from a normal PowerShell / CMD where npm works normally.
 rem Needs network once (installs electron-builder via npx).
 rem ============================================================
 cd /d "%~dp0.."
 
-echo === DeepSeek Harness Windows packaging ===
+echo === DSH Desktop Windows packaging ===
 echo.
 
 rem --- Pre-flight: close running instances and stale output -----------------
 rem A running app (or its kernel child / electron-builder helper) locks the
 rem packaged node_modules and makes electron-builder fail with EBUSY/EPERM.
 rem Kill them all, strip read-only attrs, and clear the old output with retries.
-taskkill /IM "DeepSeek Harness.exe" /F >nul 2>&1
+taskkill /IM "DSH Desktop.exe" /F >nul 2>&1
 taskkill /IM electron.exe /F >nul 2>&1
 taskkill /IM node.exe /F >nul 2>&1
 taskkill /IM app-builder.exe /F >nul 2>&1
@@ -56,10 +56,10 @@ echo [2/3] Packaging finished.
 echo.
 echo ============================================================
 echo DONE. Your app is:
-echo   %CD%\release\DeepSeek-Harness-0.1.0-rc.0.exe
+echo   %CD%\release\DSH-Desktop-0.1.0-rc.0.exe
 echo.
 echo Copy it to your Desktop and double-click to run.
-echo (Single self-contained exe, official DeepSeek Harness icon embedded.)
+echo (Single self-contained exe, DSH whale icon embedded.)
 echo ============================================================
 endlocal
 exit /b 0

@@ -1,6 +1,6 @@
 /** Ownerless-copy registrations: the five seats, dictionaries, thunked labels, and HMR recovery. */
 import { Context } from '@deepseek-ai/cordis'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { resolveSlotLabel } from '@deepseek-ai/dsh-client-ui-slots'
 import { SlotRegistry } from '@deepseek-ai/dsh-client-runtime/client'
 import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
@@ -55,18 +55,18 @@ async function bench(isLoopback = true) {
   return { ctx, slots: ctx.get('slots') as SlotRegistry, locale, settingsDescribe, settingsOpenDocument }
 }
 
-/** Declare the shell's six child slots the way ui-settings' entry does. */
+/**
+ * Declare the browser carrier's settings occupant seat (`sidebar.settings`),
+ * mirroring ui-sidebar's production registration: the framework merges the
+ * six settings child-seat declarations onto the ledger when SettingsRoot
+ * registers under it.
+ */
 function declare(slots: SlotRegistry): () => void {
   return slots.register(
     {
       name: 'root',
       children: {
-        'settings.trigger': { kind: 'single', scope: 'root' },
-        'settings.header': { kind: 'single', scope: 'root' },
-        'settings.action': { kind: 'list', scope: 'root' },
-        'settings.close': { kind: 'single', scope: 'root' },
-        'settings.section': { kind: 'list', scope: 'root' },
-        'settings.onboarding': { kind: 'list', scope: 'root' },
+        'sidebar.settings': { kind: 'single', scope: 'root' },
       },
     } as never,
     () => null,
@@ -210,5 +210,56 @@ describe('ui-settings-general apply', () => {
     await fiber.dispose()
     for (const [name] of SEATS) expect(b.slots.entries(name)).toHaveLength(0)
     expect(b.slots.spec('settings.general.item')).toBeUndefined()
+  })
+})
+
+describe('ui-settings-general apply under an embedded carrier', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  /**
+   * Declare shell.overlay the way ui-layout's root registration does; the
+   * six settings child seats land on the ledger when the overlay occupant
+   * registers with its children (the same merge the sidebar variant gets).
+   */
+  function declareOverlay(slots: SlotRegistry): () => void {
+    return slots.register(
+      {
+        name: 'root',
+        children: {
+          'shell.overlay': { kind: 'list', scope: 'root' },
+        },
+      } as never,
+      () => null,
+    )
+  }
+
+  it('registers the settings shell into shell.overlay and leaves sidebar.settings empty', async () => {
+    vi.stubGlobal('__DSH_TRANSPORT__', {})
+    const b = await bench()
+    declareOverlay(b.slots)
+    await b.ctx.plugin({ inject: [...inject], apply }).await()
+    const overlayEntries = b.slots.entries('shell.overlay')
+    expect(overlayEntries).toHaveLength(1)
+    expect(overlayEntries[0]!.options.id).toBe('settings-entry')
+    // The occupant declares the same six settings child seats as the sidebar
+    // variant, so the modal panel and onboarding stay reachable.
+    for (const [name] of SEATS) expect(b.slots.entries(name)).toHaveLength(1)
+    expect(b.slots.spec('settings.general.item')).toEqual({ kind: 'list', scope: 'root' })
+    // The browser seat is not taken in this carrier.
+    expect(b.slots.entries('sidebar.settings')).toEqual([])
+  })
+
+  it('frees the overlay entry and the child seats on teardown', async () => {
+    vi.stubGlobal('__DSH_TRANSPORT__', {})
+    const b = await bench()
+    declareOverlay(b.slots)
+    const fiber = b.ctx.plugin({ inject: [...inject], apply })
+    await fiber.await()
+    expect(b.slots.entries('shell.overlay')).toHaveLength(1)
+    await fiber.dispose()
+    expect(b.slots.entries('shell.overlay')).toHaveLength(0)
+    for (const [name] of SEATS) expect(b.slots.entries(name)).toHaveLength(0)
   })
 })

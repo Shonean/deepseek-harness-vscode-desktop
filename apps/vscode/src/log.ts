@@ -1,8 +1,8 @@
 import type { OutputChannel } from 'vscode'
 
 /**
- * Process-wide log sink for the extension: one output channel ("DeepSeek
- * Harness") carrying activation, kernel subprocess, broker, tunnel, and
+ * Process-wide log sink for the extension: one output channel ("DSH")
+ * carrying activation, kernel subprocess, broker, tunnel, and
  * command events with ISO timestamps, so a real-host failure can be read
  * without attaching a debugger. Bound once at activation; calls before
  * binding are dropped.

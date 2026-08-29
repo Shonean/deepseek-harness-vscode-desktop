@@ -7,6 +7,9 @@ packages:
   - native/landlock-run/packages/*
   # Product assemblies over the package tier; apps/cli owns the `dsh` bin.
   - apps/*
+  # Dependency-only deploy root for the VSCode/desktop web kernel closure:
+  # pnpm deploy materializes this manifest into the extension's runtime/ dir.
+  - apps/vscode/runtime-deploy
   - website
   # The runnable demo leaves join as ONE workspace member: examples/package.json
   # declares the union of every leaf's cordis.yml plugins as workspace:*, so a

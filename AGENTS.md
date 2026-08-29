@@ -80,6 +80,10 @@ pnpm run demo:cordis    # the agent modifies its own runtime (needs key)
 pnpm run demo:acp       # ACP automation server (needs DEEPSEEK_API_KEY)
 ```
 
+### Interactive command handoff
+
+When the user runs a command themselves, hand over exactly one command per message — their input wraps long or multi-command pastes and single commands Tab-complete.
+
 ### Host sandbox failures
 
 When required `gh`, `pnpm`, build, test, or generator commands fail because the agent sandbox blocks credentials, network, IPC, file watching, or nested `sandbox-exec`, retry unchanged with the narrowest host escalation before diagnosing authentication or project failure. Require sandbox evidence; never bypass genuine test failures or the product sandbox under test.

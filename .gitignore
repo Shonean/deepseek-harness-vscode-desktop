@@ -41,3 +41,6 @@ worktrees/
 .typert-*/
 
 apps/vscode/dist/
+apps/vscode/runtime/
+apps/desktop/dist/
+apps/desktop/release/

@@ -1,9 +1,9 @@
 {
   "name": "@deepseek-ai/dsh-vscode",
-  "displayName": "DeepSeek Harness",
-  "description": "DeepSeek Harness in VSCode: a slim session sidebar plus the full web chat surface in an editor panel, driven by a local web kernel.",
+  "displayName": "DSH for VS Code",
+  "description": "Unofficial community build. DeepSeek Harness (DSH) in VS Code: a slim session sidebar plus the full web chat surface in an editor panel, driven by a local web kernel.",
   "version": "0.1.0",
-  "publisher": "deepseek-ai",
+  "publisher": "shonean",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -14,24 +14,35 @@
     "dist",
     "!dist/**/*.map",
     "!dist/**/*.vsix",
-    "media"
+    "media",
+    "runtime/node_modules/**",
+    "runtime/package.json"
   ],
   "engines": {
     "vscode": "^1.95.0"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/deepseek-ai/deepseek-harness.git",
+    "url": "git+https://github.com/Shonean/deepseek-harness-vscode-desktop.git",
     "directory": "apps/vscode"
   },
   "categories": ["Machine Learning", "Chat", "Other"],
+  "keywords": [
+    "dsh",
+    "deepseek",
+    "deepseek harness",
+    "agent",
+    "ai coding agent",
+    "cli",
+    "dsh-plugin"
+  ],
   "activationEvents": [],
   "contributes": {
     "viewsContainers": {
       "activitybar": [
         {
           "id": "dsh-sidebar",
-          "title": "DeepSeek Harness",
+          "title": "DSH",
           "icon": "media/logo-whale-pink.svg"
         }
       ]
@@ -49,21 +60,21 @@
     "commands": [
       {
         "command": "dsh.openChat",
-        "title": "Open DeepSeek Harness",
+        "title": "Open DSH Panel",
         "icon": "$(comment-discussion)"
       },
       {
         "command": "dsh.closeChat",
-        "title": "Close DeepSeek Harness"
+        "title": "Close DSH Panel"
       },
       {
         "command": "dsh.newSession",
-        "title": "New DeepSeek Harness Session",
+        "title": "New DSH Session",
         "icon": "$(add)"
       },
       {
         "command": "dsh.showLogs",
-        "title": "Show DeepSeek Harness Logs"
+        "title": "Show DSH Logs"
       }
     ],
     "menus": {
@@ -87,7 +98,7 @@
       ]
     },
     "configuration": {
-      "title": "DeepSeek Harness",
+      "title": "DSH for VS Code",
       "properties": {
         "dsh-vscode.uiLocale": {
           "type": "string",
@@ -101,7 +112,8 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "pack:vsix": "node scripts/build.mjs && node scripts/pack-vsix.mjs",
+    "runtime": "node scripts/build-runtime-closure.mjs",
+    "pack:vsix": "node scripts/build.mjs && node scripts/build-runtime-closure.mjs && node scripts/pack-vsix.mjs",
     "watch": "node scripts/build.mjs --watch",
     "typecheck": "tsc -b tsconfig.json --pretty false"
   },

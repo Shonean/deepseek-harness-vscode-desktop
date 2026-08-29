@@ -1,8 +1,8 @@
 import { spawn, type ChildProcess } from 'node:child_process'
-import { createRequire } from 'node:module'
 import { existsSync } from 'node:fs'
-import { dirname, isAbsolute, join, resolve } from 'node:path'
+import { isAbsolute, join, resolve } from 'node:path'
 import { log, logError } from './log.ts'
+import { resolveDshBin } from './runtime-resolution.ts'
 
 /**
  * Owns the web kernel child process: one `dsh --profile web` bound to
@@ -56,19 +56,6 @@ export function baseUrlFrom(stdout: string): string | undefined {
 }
 
 /**
- * Resolve the workspace `dsh` bin (the profile launcher) from the extension
- * root, mirroring the runtime resolver's createRequire approach.
- * @param extensionRoot - directory whose node_modules carry workspace links.
- * @returns absolute path of the built `dsh` bin entry.
- */
-function resolveDshBin(extensionRoot: string): string {
-  const nodeRequire = createRequire(join(extensionRoot, 'package.json'))
-  const pkgJson = nodeRequire.resolve('@deepseek-ai/dsh/package.json')
-  const bin = join(dirname(pkgJson), 'lib', 'bin.js')
-  return bin
-}
-
-/**
  * Derive the per-directory node executable candidates from a PATH string. Pure
  * so the search order stays testable.
  * @param pathEnv - raw PATH value.
@@ -119,7 +106,7 @@ function killTree(child: ChildProcess): void {
  * @returns the running kernel handle.
  */
 export function startWebKernel(options: WebKernelOptions): Promise<WebKernelHandle> {
-  const bin = resolveDshBin(options.extensionRoot)
+  const { bin, root } = resolveDshBin(options.extensionRoot)
   const command = options.runtimeCommand !== undefined && options.runtimeCommand.trim().length > 0
     ? options.runtimeCommand.trim()
     : resolveNodeExecutable()
@@ -128,7 +115,7 @@ export function startWebKernel(options: WebKernelOptions): Promise<WebKernelHand
     ? [...extra, ...kernelArgs()]
     : [bin, ...extra, ...kernelArgs()]
   log(`kernel: spawn ${command} ${args.join(' ')}`)
-  log(`kernel: cwd=${options.cwd} bin=${bin}`)
+  log(`kernel: cwd=${options.cwd} bin=${bin} resolvedFrom=${root}`)
   const child = spawn(command, args, {
     cwd: options.cwd,
     // The fallback launch (host execPath) runs Electron, which would boot

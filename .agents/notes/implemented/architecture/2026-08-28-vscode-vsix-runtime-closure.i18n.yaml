@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-08-28-vscode-vsix-runtime-closure.md
+2026-08-28-vscode-vsix-runtime-closure.md: ff4c8e84f747939dac2b871d7b1f17129e513d5d
+2026-08-28-vscode-vsix-runtime-closure.zh.md: 8334e56fbc2e11669694d945993bc6f960e8721c

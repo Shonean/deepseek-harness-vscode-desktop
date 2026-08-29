@@ -299,7 +299,7 @@ function rewire(shell: ShellState, baseUrl: string, generation: number): void {
 /** Show a turn-end notification, when the platform supports it. */
 function notifyTurnEnd(): void {
   if (!Notification.isSupported()) return
-  new Notification({ title: 'DeepSeek Harness', body: 'A turn finished.' }).show()
+  new Notification({ title: 'DSH Desktop', body: 'A turn finished.' }).show()
 }
 
 /**
@@ -323,7 +323,7 @@ export function createDesktopWindow(
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: 'DeepSeek Harness',
+    title: 'DSH Desktop',
     icon: join(appBuildDir, '..', 'media', 'logo.ico'),
     show: false,
     webPreferences: {
@@ -390,7 +390,7 @@ function focusWithTarget(window: BrowserWindow, sessionId: string | undefined, b
 function installTray(iconPath: string, toggle: () => void, quit: () => void): Tray | undefined {
   try {
     const tray = new Tray(iconPath)
-    tray.setToolTip('DeepSeek Harness')
+    tray.setToolTip('DSH Desktop')
     tray.setContextMenu(Menu.buildFromTemplate([
       { label: 'Show / Hide', click: toggle },
       { type: 'separator' },
@@ -406,7 +406,7 @@ function installTray(iconPath: string, toggle: () => void, quit: () => void): Tr
 export async function main(): Promise<void> {
   registerPrivilegedSchemes()
   await app.whenReady()
-  if (process.platform === 'win32') app.setAppUserModelId('ai.deepseek.harness.desktop')
+  if (process.platform === 'win32') app.setAppUserModelId('com.shonean.dsh-desktop')
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(buildAppMenuTemplate()))
 

@@ -16,10 +16,16 @@ import { resolveSlotLabel } from '@deepseek-ai/dsh-client-ui-slots'
 import type {} from '@deepseek-ai/dsh-client-ui-settings/client'
 // Type-only: pulls ctx.locale into this program.
 import type {} from '@deepseek-ai/dsh-client-locale/client'
+// Type-only: pulls the 'shell.overlay' slot declaration into this program
+// (the embedded-carrier entry registers there). No value import crosses the
+// package boundary.
+import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 import type {
   SettingsOnboardingStep, SettingsRootInjected, SettingsSectionRow,
 } from './shell-contract.ts'
 import { SettingsRoot } from './SettingsRoot.tsx'
+import { OverlaySettingsEntry } from './OverlaySettingsEntry.tsx'
+import { hasTransportCarrier } from './carrier.ts'
 import { CloseLabel, HeaderContent, TriggerContent } from './chrome.tsx'
 import { GeneralSection } from './GeneralSection.tsx'
 import { SettingsDocumentAction } from './SettingsDocumentAction.tsx'
@@ -138,18 +144,37 @@ export function apply(ctx: ClientContext): void {
       },
     },
   })
-  ctx.slots.inject('sidebar.settings', () => ctx.slots.register({
-    name: 'sidebar.settings',
-    children: {
-      'settings.trigger': { kind: 'single', scope: 'root' },
-      'settings.header': { kind: 'single', scope: 'root' },
-      'settings.action': { kind: 'list', scope: 'root' },
-      'settings.close': { kind: 'single', scope: 'root' },
-      'settings.section': { kind: 'list', scope: 'root' },
-      'settings.onboarding': { kind: 'list', scope: 'root' },
-    },
-    inject: shellInjected,
-  }, SettingsRoot))
+  // The settings shell declares the same six settings child slots in both
+  // carriers; the occupant seat differs. Browser shells own the sidebar foot
+  // (`sidebar.settings`); embedded carriers (VSCode panel, desktop shell)
+  // render no sidebar and the host owns session navigation, so the entry rides
+  // the frame-level `shell.overlay` floating layer — the settings modal panel
+  // and onboarding are fixed viewport layers and mount identically either way.
+  // Exactly one seat is taken per carrier, so the child-slot declarations do
+  // not collide.
+  const settingsChildren = {
+    'settings.trigger': { kind: 'single', scope: 'root' },
+    'settings.header': { kind: 'single', scope: 'root' },
+    'settings.action': { kind: 'list', scope: 'root' },
+    'settings.close': { kind: 'single', scope: 'root' },
+    'settings.section': { kind: 'list', scope: 'root' },
+    'settings.onboarding': { kind: 'list', scope: 'root' },
+  } as const
+  if (hasTransportCarrier()) {
+    ctx.slots.inject('shell.overlay', () => ctx.slots.register({
+      name: 'shell.overlay',
+      id: 'settings-entry',
+      order: 100,
+      children: settingsChildren,
+      inject: shellInjected,
+    }, OverlaySettingsEntry))
+  } else {
+    ctx.slots.inject('sidebar.settings', () => ctx.slots.register({
+      name: 'sidebar.settings',
+      children: settingsChildren,
+      inject: shellInjected,
+    }, SettingsRoot))
+  }
 
   ctx.slots.inject('settings.trigger', () =>
     ctx.slots.register({ name: 'settings.trigger', locale: NS }, TriggerContent))

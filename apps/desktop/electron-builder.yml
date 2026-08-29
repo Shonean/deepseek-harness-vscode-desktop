@@ -1,5 +1,5 @@
-appId: ai.deepseek.harness.desktop
-productName: DeepSeek Harness
+appId: com.shonean.dsh-desktop
+productName: DSH Desktop
 directories:
   output: release
 files:
@@ -22,4 +22,4 @@ win:
         - x64
   icon: media/logo.ico
 portable:
-  artifactName: DeepSeek-Harness-${version}.exe
+  artifactName: DSH-Desktop-${version}.exe

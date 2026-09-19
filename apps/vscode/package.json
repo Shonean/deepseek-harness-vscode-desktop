@@ -2,7 +2,7 @@
   "name": "@deepseek-ai/dsh-vscode",
   "displayName": "DSH for VS Code",
   "description": "Unofficial community build. DeepSeek Harness (DSH) in VS Code: a slim session sidebar plus the full web chat surface in an editor panel, driven by a local web kernel.",
-  "version": "0.1.0",
+  "version": "0.1.1-rc.2",
   "publisher": "shonean",
   "license": "MIT",
   "publishConfig": {

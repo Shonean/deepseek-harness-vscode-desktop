@@ -2,7 +2,7 @@
   "name": "@deepseek-ai/dsh-desktop",
   "productName": "DSH Desktop",
   "description": "Unofficial community build. DSH Desktop — DeepSeek Harness (DSH) as a native Electron desktop shell: an Electron main process, a kernel utilityProcess child, and the built web SPA over a typed MessagePort carrier.",
-  "version": "0.1.0-rc.0",
+  "version": "0.1.1-rc.2",
   "private": true,
   "license": "MIT",
   "repository": {

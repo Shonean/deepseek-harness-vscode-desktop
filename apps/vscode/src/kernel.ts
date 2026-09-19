@@ -1,6 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { isAbsolute, join, resolve } from 'node:path'
+import { isAbsolute, resolve, win32 } from 'node:path'
 import { log, logError } from './log.ts'
 import { resolveDshBin } from './runtime-resolution.ts'
 
@@ -68,7 +68,7 @@ export function nodeSearchCandidates(pathEnv: string, platform: string = process
   return pathEnv
     .split(separator)
     .filter(entry => entry.trim().length > 0)
-    .map(entry => platform === 'win32' ? join(entry, executable) : `${entry}/${executable}`)
+    .map(entry => platform === 'win32' ? win32.join(entry, executable) : `${entry}/${executable}`)
 }
 
 /**
